@@ -1,0 +1,77 @@
+
+class Solution {
+
+    int[] parent;
+
+    public int[] findRedundantDirectedConnection(int[][] edges) {
+
+        int n = edges.length;
+
+        parent = new int[n + 1];
+
+        for (int i = 1; i <= n; i++) {
+            parent[i] = i;
+        }
+
+        int[] parentEdge1 = null;
+        int[] parentEdge2 = null;
+
+        int[] rootParent = new int[n + 1];
+
+        // Step 1: Check if a node has two parents
+        for (int[] edge : edges) {
+
+            int u = edge[0];
+            int v = edge[1];
+
+            if (rootParent[v] == 0) {
+                rootParent[v] = u;
+            } else {
+                parentEdge1 = new int[]{rootParent[v], v};
+                parentEdge2 = edge;
+
+                // Ignore the second edge temporarily
+                edge[1] = 0;
+            }
+        }
+
+        // Step 2: Detect cycle using DSU
+        for (int[] edge : edges) {
+
+            int u = edge[0];
+            int v = edge[1];
+
+            if (v == 0) {
+                continue;
+            }
+
+            int pu = find(u);
+            int pv = find(v);
+
+            if (pu == pv) {
+
+                // Case 2: Cycle without two parents
+                if (parentEdge1 == null) {
+                    return edge;
+                }
+
+                // Case 3: Two parents + cycle
+                return parentEdge1;
+            }
+
+            parent[pu] = pv;
+        }
+
+        // Case 1: Two parents but no cycle
+        return parentEdge2;
+    }
+
+    private int find(int x) {
+
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+
+        return parent[x];
+    }
+}
